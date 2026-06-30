@@ -13,12 +13,12 @@
    ════════════════════════════════════════════════════════ */
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAMpTPa4cGbothg2vu51eLecvZzrnVi6uU",
+    authDomain: "schoolofnursing-11d85.firebaseapp.com",
+    projectId: "schoolofnursing-11d85",
+    storageBucket: "schoolofnursing-11d85.firebasestorage.app",
+    messagingSenderId: "939206185545",
+    appId: "1:939206185545:web:e46e45d2cff9b1612de598"
 };
 
 // Initialize Firebase (using the compat/CDN SDK loaded in index.html)
