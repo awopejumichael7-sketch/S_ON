@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="CBT Examination System - Ogun State College of Nursing" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>CBT Examination System — Ogun State College of Nursing</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Prevent caching of exam content -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+</head>
+<body>
+<!-- ═══════════════════════════════════════════════════════
+WATERMARK OVERLAY (shown when tab loses focus)
+═══════════════════════════════════════════════════════════ -->
+<div id="watermark-overlay" class="watermark-overlay" aria-hidden="true">
+  <div id="watermark-text" class="watermark-text">EXAM IN PROGRESS</div>
+  <div class="watermark-warning">⚠ Return to your exam window</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+VIOLATION WARNING MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="violation-modal" class="modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="violation-title">
+  <div class="modal-box violation-box">
+    <div class="violation-icon">⚠️</div>
+    <h2 id="violation-title">Security Warning</h2>
+    <p id="violation-message">You have left the exam window.</p>
+    <div class="violation-count">Violations: <span id="violation-num">1</span> / 3</div>
+    <p class="violation-note">After 3 violations, your exam will be automatically submitted.</p>
+    <button class="btn btn-danger" onclick="CBT.dismissViolation()">Return to Exam</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+AUTO-SUBMIT MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="autosubmit-modal" class="modal-overlay" role="alertdialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="violation-icon">🚨</div>
+    <h2>Exam Auto-Submitted</h2>
+    <p>Your exam has been automatically submitted due to repeated security violations.</p>
+    <button class="btn btn-primary" onclick="CBT.showResult()">View Result</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+CONFIRM SUBMIT MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="confirm-submit-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div class="modal-box">
+    <div class="violation-icon">📋</div>
+    <h2 id="confirm-title">Submit Exam?</h2>
+    <div id="confirm-stats" class="confirm-stats"></div>
+    <p>Once submitted, you cannot change your answers.</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="CBT.closeConfirm()">Continue Exam</button>
+      <button class="btn btn-danger" onclick="CBT.confirmSubmit()">Submit Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+FULLSCREEN PROMPT
+═══════════════════════════════════════════════════════════ -->
+<div id="fullscreen-modal" class="modal-overlay active" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="violation-icon">🖥️</div>
+    <h2>Full Screen Required</h2>
+    <p>This exam must be taken in full screen mode to prevent cheating. Click the button below to enter full screen and begin.</p>
+    <p class="small-note">You must keep the browser in full screen throughout the exam.</p>
+    <button class="btn btn-primary btn-large" id="enter-fullscreen-btn">Enter Full Screen &amp; Start Exam</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+APP ROOT
+═══════════════════════════════════════════════════════════ -->
+<div id="app">
+  <!-- ─── HEADER ────────────────────────────────────────── -->
+  <header class="app-header" id="app-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="brand-logo" aria-hidden="true">🏥</div>
+        <div class="brand-text">
+          <span class="brand-title">CBT Exam System</span>
+          <span class="brand-sub">Ogun State College of Nursing</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle theme">
+          <span id="theme-icon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── SCREENS ───────────────────────────────────────── -->
+
+  <!-- SCREEN: LOGIN / SIGNUP -->
+  <section id="screen-login" class="screen active" aria-label="Login">
+    <div class="auth-wrap">
+      <div class="auth-box">
+        <div class="brand-logo" aria-hidden="true" style="font-size:2.5rem;text-align:center;">🏥</div>
+        <h1 class="auth-title" id="auth-title">Sign In</h1>
+        <p class="auth-sub">Ogun State College of Nursing — CBT Exam System</p>
+
+        <div id="auth-error" class="auth-error" style="display:none"></div>
+
+        <!-- Name field only shown for signup -->
+        <div class="form-group" id="auth-name-group" style="display:none">
+          <label for="auth-name">Full Name</label>
+          <input type="text" id="auth-name" placeholder="Your full name" autocomplete="name" />
+        </div>
+
+        <div class="form-group">
+          <label for="auth-email">Email</label>
+          <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+
+        <div class="form-group">
+          <label for="auth-password">Password</label>
+          <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <button class="btn btn-primary btn-large" id="auth-submit-btn" onclick="AppAuthUI.submit()">
+          Sign In
+        </button>
+
+        <button class="btn btn-ghost" id="auth-forgot-btn" onclick="AppAuthUI.forgotPassword()">
+          Forgot password?
+        </button>
+
+        <p class="auth-toggle">
+          <span id="auth-toggle-text">Don't have an account?</span>
+          <a href="#" id="auth-toggle-link" onclick="AppAuthUI.toggleMode(event)">Sign Up</a>
+        </p>
+      </div>
+    </div>
+  </section><!-- /screen-login -->
+
+  <!-- SCREEN: DASHBOARD -->
+  <section id="screen-dashboard" class="screen" aria-label="Dashboard">
+    <div class="dashboard-hero">
+      <h1 class="hero-title">Entrance Exam Practice</h1>
+      <p class="hero-sub">10 years of past questions · 426 total questions · Instant results</p>
+    </div>
+    <div class="subject-grid" role="list" aria-label="Subjects">
+      <!-- Physics Card -->
+      <div class="subject-card" role="listitem" data-subject="physics" tabindex="0"
+           aria-label="Physics - 134 questions, 60 minutes">
+        <div class="card-glow"></div>
+        <div class="card-icon" aria-hidden="true">⚡</div>
+        <div class="card-content">
+          <h2 class="card-title">Physics</h2>
+          <div class="card-meta">
+            <span class="meta-badge"><span aria-hidden="true">📝</span> 60 Questions</span>
+            <span class="meta-badge"><span aria-hidden="true">⏱</span> 60 Minutes</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-primary" onclick="CBT.startExam('physics')" aria-label="Start Physics exam">
+Start Exam
+            </button>
+            <button class="btn btn-outline" onclick="CBT.startStudy('physics')" aria-label="Study Physics">
+Study Mode
+            </button>
+            <button class="btn btn-ghost" onclick="CBT.showHistory('physics')" aria-label="Physics past results">
+Past Results
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Chemistry Card -->
+      <div class="subject-card" role="listitem" data-subject="chemistry" tabindex="0"
+           aria-label="Chemistry - 60 questions, 60 minutes">
+        <div class="card-glow"></div>
+        <div class="card-icon" aria-hidden="true">🧪</div>
+        <div class="card-content">
+          <h2 class="card-title">Chemistry</h2>
+          <div class="card-meta">
+            <span class="meta-badge"><span aria-hidden="true">📝</span> 60 Questions</span>
+            <span class="meta-badge"><span aria-hidden="true">⏱</span> 60 Minutes</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-primary" onclick="CBT.startExam('chemistry')" aria-label="Start Chemistry exam">
+Start Exam
+            </button>
+            <button class="btn btn-outline" onclick="CBT.startStudy('chemistry')" aria-label="Study Chemistry">
+Study Mode
+            </button>
+            <button class="btn btn-ghost" onclick="CBT.showHistory('chemistry')" aria-label="Chemistry past results">
+Past Results
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Mathematics Card -->
+      <div class="subject-card" role="listitem" data-subject="mathematics" tabindex="0"
+           aria-label="Mathematics - 60 questions, 60 minutes">
+        <div class="card-glow"></div>
+        <div class="card-icon" aria-hidden="true">📐</div>
+        <div class="card-content">
+          <h2 class="card-title">Mathematics</h2>
+          <div class="card-meta">
+            <span class="meta-badge"><span aria-hidden="true">📝</span> 60 Questions</span>
+            <span class="meta-badge"><span aria-hidden="true">⏱</span> 60 Minutes</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-primary" onclick="CBT.startExam('mathematics')" aria-label="Start Mathematics exam">
+Start Exam
+            </button>
+            <button class="btn btn-outline" onclick="CBT.startStudy('mathematics')" aria-label="Study Mathematics">
+Study Mode
+            </button>
+            <button class="btn btn-ghost" onclick="CBT.showHistory('mathematics')" aria-label="Mathematics past results">
+Past Results
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- English Card -->
+      <div class="subject-card" role="listitem" data-subject="english" tabindex="0"
+           aria-label="English Language - 60 questions, 60 minutes">
+        <div class="card-glow"></div>
+        <div class="card-icon" aria-hidden="true">📚</div>
+        <div class="card-content">
+          <h2 class="card-title">English Language</h2>
+          <div class="card-meta">
+            <span class="meta-badge"><span aria-hidden="true">📝</span> 60 Questions</span>
+            <span class="meta-badge"><span aria-hidden="true">⏱</span> 60 Minutes</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-primary" onclick="CBT.startExam('english')" aria-label="Start English exam">
+Start Exam
+            </button>
+            <button class="btn btn-outline" onclick="CBT.startStudy('english')" aria-label="Study English">
+Study Mode
+            </button>
+            <button class="btn btn-ghost" onclick="CBT.showHistory('english')" aria-label="English past results">
+Past Results
+            </button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /subject-grid -->
+    <!-- Quick Stats -->
+    <div class="dashboard-stats" id="dashboard-stats">
+      <div class="stat-item">
+        <span class="stat-value" id="stat-total-attempts">0</span>
+        <span class="stat-label">Attempts</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-best-score">—</span>
+        <span class="stat-label">Best Score</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-avg-score">—</span>
+        <span class="stat-label">Average Score</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">426</span>
+        <span class="stat-label">Total Questions</span>
+      </div>
+    </div>
+  </section><!-- /screen-dashboard -->
+
+  <!-- SCREEN: EXAM -->
+  <section id="screen-exam" class="screen" aria-label="Exam" aria-live="polite">
+    <!-- Exam Top Bar -->
+    <div class="exam-topbar" id="exam-topbar">
+      <div class="exam-info">
+        <span class="exam-subject-badge" id="exam-subject-label">Physics</span>
+        <span class="exam-qcount" id="exam-qcount">Q 1/60</span>
+      </div>
+      <!-- Timer -->
+      <div class="timer-wrap" id="timer-wrap" aria-live="assertive" aria-label="Time remaining">
+        <div class="timer-ring-wrap">
+          <svg class="timer-svg" viewBox="0 0 60 60" aria-hidden="true">
+            <circle class="timer-track" cx="30" cy="30" r="26"/>
+            <circle class="timer-progress" id="timer-progress-ring" cx="30" cy="30" r="26"
+                    stroke-dasharray="163.36" stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-display" id="timer-display">60:00</div>
+        </div>
+      </div>
+      <div class="exam-controls">
+        <button class="btn btn-ghost btn-sm" id="toggle-palette-btn"
+                onclick="CBT.togglePalette()" aria-label="Toggle question palette">
+☰ Palette
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="CBT.showConfirmSubmit()">
+Submit
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="exam-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="60"
+         aria-valuenow="0" id="exam-progress-bar-wrapper">
+      <div class="exam-progress-fill" id="exam-progress-fill"></div>
+    </div>
+
+    <div class="exam-body">
+      <!-- Mobile palette backdrop (tap to close) -->
+      <div class="palette-backdrop" id="palette-backdrop" onclick="CBT.togglePalette(false)"></div>
+
+      <!-- Question Palette Sidebar -->
+      <aside class="question-palette" id="question-palette" aria-label="Question navigation palette">
+        <div class="palette-header">
+          <h3>Question Palette</h3>
+          <button class="btn-icon" onclick="CBT.togglePalette()" aria-label="Close palette">✕</button>
+        </div>
+        <div class="palette-legend">
+          <span class="legend-item legend-answered">Answered</span>
+          <span class="legend-item legend-unanswered">Unanswered</span>
+          <span class="legend-item legend-review">Marked</span>
+          <span class="legend-item legend-current">Current</span>
+        </div>
+        <div class="palette-grid" id="palette-grid" role="list" aria-label="Question numbers"></div>
+      </aside>
+
+      <!-- Question Area -->
+      <main class="question-area" id="question-area">
+        <div class="question-card" id="question-card">
+          <div class="question-header">
+            <div class="question-number" id="question-number">Question 1</div>
+            <button class="mark-review-btn" id="mark-review-btn"
+                    onclick="CBT.toggleMarkReview()" aria-pressed="false"
+                    aria-label="Mark for review">
+🔖 Mark for Review
+            </button>
+          </div>
+          <div class="question-text" id="question-text" aria-live="polite"></div>
+          <div class="options-list" id="options-list" role="radiogroup"
+               aria-label="Answer options"></div>
+          <div class="question-nav">
+            <button class="btn btn-outline" id="prev-btn" onclick="CBT.prevQuestion()"
+                    aria-label="Previous question">
+◀ Previous
+            </button>
+            <button class="btn btn-ghost" id="clear-btn" onclick="CBT.clearAnswer()"
+                    aria-label="Clear answer">
+Clear
+            </button>
+            <button class="btn btn-primary" id="next-btn" onclick="CBT.nextQuestion()"
+                    aria-label="Next question">
+Next ▶
+            </button>
+          </div>
+        </div>
+      </main>
+    </div><!-- /exam-body -->
+  </section><!-- /screen-exam -->
+
+  <!-- SCREEN: RESULT -->
+  <section id="screen-result" class="screen" aria-label="Exam Results">
+    <div class="result-container">
+      <div class="result-header">
+        <h1>Exam Complete!</h1>
+        <div class="result-subject" id="result-subject-name"></div>
+      </div>
+
+      <!-- Score Circle -->
+      <div class="score-circle-wrap">
+        <svg class="score-svg" viewBox="0 0 160 160" aria-hidden="true">
+          <circle class="score-track" cx="80" cy="80" r="70"/>
+          <circle class="score-fill" id="score-circle-fill" cx="80" cy="80" r="70"
+                  stroke-dasharray="439.82" stroke-dashoffset="439.82"/>
+        </svg>
+        <div class="score-inner">
+          <div class="score-percent" id="score-percent">0%</div>
+          <div class="score-grade" id="score-grade">—</div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="result-stats-grid">
+        <div class="result-stat correct">
+          <span class="rs-icon">✅</span>
+          <span class="rs-val" id="rs-correct">0</span>
+          <span class="rs-lbl">Correct</span>
+        </div>
+        <div class="result-stat wrong">
+          <span class="rs-icon">❌</span>
+          <span class="rs-val" id="rs-wrong">0</span>
+          <span class="rs-lbl">Wrong</span>
+        </div>
+        <div class="result-stat skipped">
+          <span class="rs-icon">⬜</span>
+          <span class="rs-val" id="rs-skipped">0</span>
+          <span class="rs-lbl">Unanswered</span>
+        </div>
+        <div class="result-stat time">
+          <span class="rs-icon">⏱</span>
+          <span class="rs-val" id="rs-time">0:00</span>
+          <span class="rs-lbl">Time Spent</span>
+        </div>
+      </div>
+
+      <!-- Performance Bar Chart -->
+      <div class="perf-chart-section">
+        <h2>Performance Chart</h2>
+        <div class="perf-bars" id="perf-bars" aria-label="Performance breakdown"></div>
+      </div>
+
+      <!-- Review Section -->
+      <div class="review-section">
+        <h2>Question Review</h2>
+        <div class="review-filter">
+          <button class="filter-btn active" data-filter="all" onclick="CBT.filterReview('all')">All</button>
+          <button class="filter-btn" data-filter="correct" onclick="CBT.filterReview('correct')">Correct</button>
+          <button class="filter-btn" data-filter="wrong" onclick="CBT.filterReview('wrong')">Wrong</button>
+          <button class="filter-btn" data-filter="skipped" onclick="CBT.filterReview('skipped')">Skipped</button>
+        </div>
+        <div class="review-list" id="review-list" aria-label="Question review list"></div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-outline" onclick="CBT.retakeExam()">Retake Exam</button>
+        <button class="btn btn-primary" onclick="CBT.goHome()">Back to Dashboard</button>
+      </div>
+    </div>
+  </section><!-- /screen-result -->
+
+  <!-- SCREEN: STUDY MODE -->
+  <section id="screen-study" class="screen" aria-label="Study Mode">
+    <div class="study-header">
+      <button class="btn btn-ghost" onclick="CBT.goHome()" aria-label="Back to dashboard">← Back</button>
+      <h1 class="study-title" id="study-title">Study Mode — Physics</h1>
+      <div class="study-progress-wrap">
+        <span id="study-progress-text">0 / 0 studied</span>
+      </div>
+    </div>
+    <div class="study-controls">
+      <div class="search-wrap">
+        <input type="search" id="study-search" placeholder="Search questions…"
+               aria-label="Search questions" oninput="CBT.filterStudy()" />
+        <span class="search-icon" aria-hidden="true">🔍</span>
+      </div>
+      <div class="study-filter-btns">
+        <button class="filter-btn active" data-topic="all" onclick="CBT.filterStudyYear('all')">All Years</button>
+        <!-- Year buttons added dynamically -->
+      </div>
+    </div>
+    <div class="study-stats-bar" id="study-stats-bar">
+      <span id="study-total-count">134 questions</span>
+      <span id="study-bookmarks-count">0 bookmarked</span>
+      <span id="study-mastered-count">0 mastered</span>
+      <button class="btn btn-ghost btn-sm" onclick="CBT.showBookmarksOnly()" id="show-bookmarks-btn">
+🔖 Bookmarks Only
+      </button>
+    </div>
+    <div class="study-list" id="study-list" aria-label="Study question list"></div>
+  </section><!-- /screen-study -->
+
+  <!-- SCREEN: HISTORY -->
+  <section id="screen-history" class="screen" aria-label="Past Results">
+    <div class="history-header">
+      <button class="btn btn-ghost" onclick="CBT.goHome()" aria-label="Back">← Back</button>
+      <h1 id="history-title">Past Results — Physics</h1>
+    </div>
+    <div class="history-list" id="history-list" aria-label="Past exam attempts"></div>
+    <div class="history-empty" id="history-empty" style="display:none">
+      <div class="empty-icon">📊</div>
+      <p>No attempts yet. Start an exam to see your results here.</p>
+      <button class="btn btn-primary" onclick="CBT.goHome()">Go to Dashboard</button>
+    </div>
+  </section><!-- /screen-history -->
+
+</div><!-- /app -->
+
+<!-- ═══════════════════════════════════════════════════════
+Scripts
+Order matters: Firebase SDK → firebase config → auth → firestore
+→ question bank → core app logic → auth/app integration glue
+═══════════════════════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="auth.js"></script>
+<script src="firestore.js"></script>
+<script src="questions.js"></script>
+<script src="script.js"></script>
+<script src="app-auth-integration.js"></script>
+</body>
+</html>
